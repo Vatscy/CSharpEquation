@@ -2,14 +2,17 @@
     "version": "1.0.0-*",
     "dependencies": {
     },
-    "commands": { 
+    "commands": {
         "run": "run"
     },
     "frameworks": {
         "aspnet50": { },
-        "aspnetcore50": { 
+        "aspnetcore50": {
             "dependencies": {
-                "System.Console": "4.0.0-beta-*"
+                "System.Console": "4.0.0-beta-*",
+                "System.Collections": "4.0.10-beta-*",
+                "System.Linq": "4.0.0-beta-*",
+                "System.Runtime.Extensions": "4.0.10-beta-*"
             }
         }
     }

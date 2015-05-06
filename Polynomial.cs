@@ -133,39 +133,49 @@ namespace Vatscy.Equation
         {
             return Coefficients.ContainsKey(index) ? Coefficients[index] : 0;
         }
-
-        // 左辺をこの多項式、右辺を0としたときの1次方程式の解を求めます。
-        public double SolveLinearEquation()
+        
+        // 左辺、右辺を指定して方程式を作り、解を求めます。
+        public static double[] SolveEquation(Polynomial left, Polynomial right)
         {
-            if (Degree != 1)
+            var equation = left - right;
+            switch (equation.Degree)
             {
-                throw new InvalidOperationException("The degree must be 1.");
+                case 0:
+                    if (equation.GetCoefficient(0) != 0)
+                    {
+                        return new double[0];
+                    }
+                    else
+                    {
+                        throw new OverflowException("an arbitrary real number is a solution of this equation.");
+                    }
+                case 1:
+                    {
+                        var a = equation.GetCoefficient(1);
+                        var b = equation.GetCoefficient(0);
+
+                        return new[] { -b / a };
+                    }
+                case 2:
+                    {
+                        var a = equation.GetCoefficient(2);
+                        var b = equation.GetCoefficient(1);
+                        var c = equation.GetCoefficient(0);
+                        var d = b * b - 4 * a * c;
+
+                        return d > 0 ? new[] { (-b - Math.Sqrt(d)) / (2 * a), (-b + Math.Sqrt(d)) / (2 * a) }
+                            : d == 0 ? new[] { -b / (2 * a) }
+                            : new double[0];
+                    }
+                default:
+                    throw new NotImplementedException("disable to be solved.");
             }
-
-            // ax + b = 0 
-            var a = GetCoefficient(1);
-            var b = GetCoefficient(0);
-
-            return -b / a;
         }
-
-        // 左辺をこの多項式、右辺を0としたときの2次方程式の解を求めます。
-        public double[] SolveQuadraticEquation()
+        
+        // 右辺を指定して方程式を作り、解を求めます。
+        public double[] SolveEquation(Polynomial right)
         {
-            if (Degree != 2)
-            {
-                throw new InvalidOperationException("The degree must be 2.");
-            }
-
-            // ax^2 + bx + c = 0 
-            var a = GetCoefficient(2);
-            var b = GetCoefficient(1);
-            var c = GetCoefficient(0);
-            var d = b * b - 4 * a * c;
-
-            return d > 0 ? new[] { (-b - Math.Sqrt(d)) / (2 * a), (-b + Math.Sqrt(d)) / (2 * a) }
-                : d == 0 ? new[] { -b / (2 * a) }
-                : new double[0];
+            return Polynomial.SolveEquation(this, right);
         }
 
         // この多項式を表す文字列に変換します。

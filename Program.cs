@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace Vatscy.Equation
 {
@@ -14,7 +15,7 @@ namespace Vatscy.Equation
 
             // 2点を通る直線の方程式を求める
             var var_a = Polynomial.X;
-            var a = ((var_a * p1.X - p1.Y) - (var_a * p2.X - p2.Y)).SolveLinearEquation();
+            var a = (var_a * p1.X - p1.Y).SolveEquation(var_a * p2.X - p2.Y).Single();
             var b = (p1.Y - var_a * p1.X)[a];
             var f = a * Polynomial.X + b;
             Console.WriteLine("Linear Equation: y = " + f.ToString("x"));

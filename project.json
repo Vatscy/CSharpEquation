@@ -1,18 +1,22 @@
 {
     "version": "1.0.0-*",
-    "dependencies": {
-    },
+    "dependencies": { },
     "commands": {
         "run": "run"
     },
     "frameworks": {
-        "aspnet50": { },
+        "aspnet50": {
+            "dependencies": {
+                "System.Runtime.Numerics": "4.0.0-beta-*"
+            }
+        },
         "aspnetcore50": {
             "dependencies": {
                 "System.Console": "4.0.0-beta-*",
                 "System.Collections": "4.0.10-beta-*",
                 "System.Linq": "4.0.0-beta-*",
-                "System.Runtime.Extensions": "4.0.10-beta-*"
+                "System.Runtime.Extensions": "4.0.10-beta-*",
+                "System.Runtime.Numerics": "4.0.0-beta-*"
             }
         }
     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 namespace Vatscy.Equation
 {
@@ -9,7 +10,7 @@ namespace Vatscy.Equation
     public struct Polynomial
     {
         // 多項式中の変数
-        public static readonly Polynomial X = new Polynomial(new Dictionary<int, double> { { 1, 1 } });
+        public static readonly Polynomial X = new Polynomial(new Dictionary<int, Complex> { { 1, 1 } });
 
         // 度数
         public int Degree
@@ -18,33 +19,38 @@ namespace Vatscy.Equation
         }
 
         // 変数に値を代入した値を取得します。
-        public double this[double value]
+        public Complex this[Complex value]
         {
-            get { return Coefficients.Sum(c => c.Value * Math.Pow(value, c.Key)); }
+            get { return Coefficients.Select(c => c.Value * Complex.Pow(value, c.Key)).Aggregate((sum, next) => sum + next); }
         }
 
-        private static readonly IDictionary<int, double> _coefficients_empty = new Dictionary<int, double>();
+        private static readonly IDictionary<int, Complex> _coefficients_empty = new Dictionary<int, Complex>();
 
-        private IDictionary<int, double> _coefficients;
+        private IDictionary<int, Complex> _coefficients;
 
-        private IDictionary<int, double> Coefficients
+        private IDictionary<int, Complex> Coefficients
         {
             get { return _coefficients == null ? _coefficients_empty : _coefficients; }
         }
 
-        private Polynomial(IDictionary<int, double> coefficients)
+        private Polynomial(IDictionary<int, Complex> coefficients)
         {
             _coefficients = coefficients;
         }
 
+        public static implicit operator Polynomial(Complex value)
+        {
+            return value == 0 ? default(Polynomial) : new Polynomial(new Dictionary<int, Complex> { { 0, value } });
+        }
+
         public static implicit operator Polynomial(double value)
         {
-            return value == 0 ? default(Polynomial) : new Polynomial(new Dictionary<int, double> { { 0, value } });
+            return value == 0 ? default(Polynomial) : new Polynomial(new Dictionary<int, Complex> { { 0, value } });
         }
 
         public static Polynomial operator +(Polynomial p1, Polynomial p2)
         {
-            var coefficients = new Dictionary<int, double>(p1.Coefficients);
+            var coefficients = new Dictionary<int, Complex>(p1.Coefficients);
 
             foreach (var item2 in p2.Coefficients)
             {
@@ -55,7 +61,7 @@ namespace Vatscy.Equation
 
         public static Polynomial operator -(Polynomial p1, Polynomial p2)
         {
-            var coefficients = new Dictionary<int, double>(p1.Coefficients);
+            var coefficients = new Dictionary<int, Complex>(p1.Coefficients);
 
             foreach (var item2 in p2.Coefficients)
             {
@@ -66,7 +72,7 @@ namespace Vatscy.Equation
 
         public static Polynomial operator *(Polynomial p1, Polynomial p2)
         {
-            var coefficients = new Dictionary<int, double>();
+            var coefficients = new Dictionary<int, Complex>();
 
             foreach (var item1 in p1.Coefficients)
             {
@@ -78,9 +84,9 @@ namespace Vatscy.Equation
             return new Polynomial(coefficients);
         }
 
-        public static Polynomial operator /(Polynomial p, double value)
+        public static Polynomial operator /(Polynomial p, Complex value)
         {
-            var coefficients = new Dictionary<int, double>();
+            var coefficients = new Dictionary<int, Complex>();
 
             foreach (var item in p.Coefficients)
             {
@@ -125,7 +131,7 @@ namespace Vatscy.Equation
             return !p1.Equals(p2);
         }
 
-        private static void AddMonomial(Dictionary<int, double> coefficients, int index, double coefficient)
+        private static void AddMonomial(Dictionary<int, Complex> coefficients, int index, Complex coefficient)
         {
             var totalCoefficient = coefficients.ContainsKey(index) ? coefficient + coefficients[index] : coefficient;
 
@@ -139,13 +145,13 @@ namespace Vatscy.Equation
             }
         }
 
-        private double GetCoefficient(int index)
+        private Complex GetCoefficient(int index)
         {
             return Coefficients.ContainsKey(index) ? Coefficients[index] : 0;
         }
 
         // 左辺、右辺を指定して方程式を作り、解を求めます。
-        public static double[] SolveEquation(Polynomial left, Polynomial right)
+        public static Complex[] SolveEquation(Polynomial left, Polynomial right)
         {
             var equation = left - right;
             switch (equation.Degree)
@@ -153,11 +159,11 @@ namespace Vatscy.Equation
                 case 0:
                     if (equation != 0)
                     {
-                        return new double[0];
+                        return new Complex[0];
                     }
                     else
                     {
-                        throw new OverflowException("an arbitrary real number is a solution of this equation.");
+                        throw new OverflowException("an arbitrary number is a solution of this equation.");
                     }
                 case 1:
                     {
@@ -173,9 +179,7 @@ namespace Vatscy.Equation
                         var c = equation.GetCoefficient(0);
                         var d = b * b - 4 * a * c;
 
-                        return d > 0 ? new[] { (-b - Math.Sqrt(d)) / (2 * a), (-b + Math.Sqrt(d)) / (2 * a) }
-                            : d == 0 ? new[] { -b / (2 * a) }
-                            : new double[0];
+                        return new Complex[] { (-b - Complex.Sqrt(d)) / (2 * a), (-b + Complex.Sqrt(d)) / (2 * a) };
                     }
                 default:
                     throw new NotImplementedException("disable to be solved.");
@@ -183,7 +187,7 @@ namespace Vatscy.Equation
         }
 
         // 右辺を指定して方程式を作り、解を求めます。
-        public double[] SolveEquation(Polynomial right)
+        public Complex[] SolveEquation(Polynomial right)
         {
             return Polynomial.SolveEquation(this, right);
         }
@@ -200,16 +204,13 @@ namespace Vatscy.Equation
             var builder = new StringBuilder();
             foreach (var c in Coefficients.OrderByDescending(x => x.Key))
             {
-                var abs = Math.Abs(c.Value);
-
-                builder.Append(c.Value > 0 ? '+' : '-').Append(' ');
-                if (c.Key == 0 || abs != 1) builder.Append(abs);
+                builder.Append(c.Value.ToString());
                 if (c.Key != 0) builder.Append(variable);
                 if (c.Key > 1) builder.Append('^').Append(c.Key);
-                builder.Append(' ');
+                builder.Append(" + ");
             }
-            builder.Remove(builder.Length - 1, 1);
-            return builder[0] == '+' ? builder.ToString(2, builder.Length - 2) : builder.ToString();
+            builder.Remove(builder.Length - 3, 3);
+            return builder.ToString();
         }
 
         // override object.Equals
@@ -229,7 +230,7 @@ namespace Vatscy.Equation
 
             foreach (var c in Coefficients)
             {
-                double value;
+                Complex value;
                 if (!p.Coefficients.TryGetValue(c.Key, out value) || value != c.Value) return false;
             }
 
@@ -245,6 +246,10 @@ namespace Vatscy.Equation
             else if (obj is Polynomial)
             {
                 return (Polynomial)obj;
+            }
+            else if (obj is Complex || obj is BigInteger || obj is Decimal)
+            {
+                return (Complex)obj;
             }
             else
             {

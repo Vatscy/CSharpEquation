@@ -178,26 +178,18 @@ namespace Vatscy.Equation
         public string ToString(string variable)
         {
             var builder = new StringBuilder();
-            var equation = Coefficients
-                .OrderByDescending(x => x.Key)
-                .Select(x =>
-                {
-                    string sign, abs;
-                    if (x.Value > 0)
-                    {
-                        sign = "+";
-                        abs = x.Value.ToString();
-                    }
-                    else
-                    {
-                        sign = "-";
-                        abs = (-x.Value).ToString();
-                    }
-                    return sign + " " + (x.Key == 0 ? abs : (abs != "1" ? abs : "") + variable + (x.Key > 1 ? "^" + x.Key : ""));
-                })
-                .Aggregate((now, next) => now + " " + next);
+            foreach (var c in Coefficients.OrderByDescending(x => x.Key))
+            {
+                var abs = Math.Abs(c.Value);
 
-            return equation.StartsWith("+") ? equation.Substring(2) : equation;
+                builder.Append(c.Value > 0 ? '+' : '-').Append(' ');
+                if (c.Key == 0 || abs != 1) builder.Append(abs);
+                if (c.Key != 0) builder.Append(variable);
+                if (c.Key > 1) builder.Append('^').Append(c.Key);
+                builder.Append(' ');
+            }
+            builder.Remove(builder.Length - 1, 1);
+            return builder[0] == '+' ? builder.ToString(2, builder.Length - 2) : builder.ToString();
         }
     }
 }

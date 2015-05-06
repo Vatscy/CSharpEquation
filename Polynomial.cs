@@ -215,9 +215,15 @@ namespace Vatscy.Equation
         // override object.Equals
         public override bool Equals(object obj)
         {
-            if (!(obj is Polynomial)) return false;
-
-            var p = (Polynomial)obj;
+            Polynomial p;
+            try
+            {
+                p = Polynomial.Cast(obj);
+            }
+            catch
+            {
+                return false;
+            }
 
             if (Coefficients.Count != p.Coefficients.Count) return false;
 
@@ -228,6 +234,22 @@ namespace Vatscy.Equation
             }
 
             return true;
+        }
+
+        private static Polynomial Cast(object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException("obj");
+            }
+            else if (obj is Polynomial)
+            {
+                return (Polynomial)obj;
+            }
+            else
+            {
+                return Convert.ToDouble(obj);
+            }
         }
 
         // override object.GetHashCode

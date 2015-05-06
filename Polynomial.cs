@@ -197,6 +197,8 @@ namespace Vatscy.Equation
         // 変数となる文字列を指定して、この多項式を表す文字列に変換します。
         public string ToString(string variable)
         {
+            if (this == 0) return "0";
+
             var builder = new StringBuilder();
             foreach (var c in Coefficients.OrderByDescending(x => x.Key))
             {

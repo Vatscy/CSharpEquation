@@ -115,6 +115,16 @@ namespace Vatscy.Equation
             return -1 * p;
         }
 
+        public static bool operator ==(Polynomial p1, Polynomial p2)
+        {
+            return p1.Equals(p2);
+        }
+
+        public static bool operator !=(Polynomial p1, Polynomial p2)
+        {
+            return !p1.Equals(p2);
+        }
+
         private static void AddMonomial(Dictionary<int, double> coefficients, int index, double coefficient)
         {
             var totalCoefficient = coefficients.ContainsKey(index) ? coefficient + coefficients[index] : coefficient;
@@ -133,7 +143,7 @@ namespace Vatscy.Equation
         {
             return Coefficients.ContainsKey(index) ? Coefficients[index] : 0;
         }
-        
+
         // 左辺、右辺を指定して方程式を作り、解を求めます。
         public static double[] SolveEquation(Polynomial left, Polynomial right)
         {
@@ -141,7 +151,7 @@ namespace Vatscy.Equation
             switch (equation.Degree)
             {
                 case 0:
-                    if (equation.GetCoefficient(0) != 0)
+                    if (equation != 0)
                     {
                         return new double[0];
                     }
@@ -171,7 +181,7 @@ namespace Vatscy.Equation
                     throw new NotImplementedException("disable to be solved.");
             }
         }
-        
+
         // 右辺を指定して方程式を作り、解を求めます。
         public double[] SolveEquation(Polynomial right)
         {
@@ -200,6 +210,30 @@ namespace Vatscy.Equation
             }
             builder.Remove(builder.Length - 1, 1);
             return builder[0] == '+' ? builder.ToString(2, builder.Length - 2) : builder.ToString();
+        }
+
+        // override object.Equals
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Polynomial)) return false;
+
+            var p = (Polynomial)obj;
+
+            if (Coefficients.Count != p.Coefficients.Count) return false;
+
+            foreach (var c in Coefficients)
+            {
+                double value;
+                if (!p.Coefficients.TryGetValue(c.Key, out value) || value != c.Value) return false;
+            }
+
+            return true;
+        }
+
+        // override object.GetHashCode
+        public override int GetHashCode()
+        {
+            return Degree ^ Coefficients.Count;
         }
     }
 }

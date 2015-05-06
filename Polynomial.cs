@@ -259,5 +259,17 @@ namespace Vatscy.Equation
         {
             return Degree ^ Coefficients.Count;
         }
+
+        // 多項式を1変数関数と見なして微分します。
+        public Polynomial Differentiate()
+        {
+            var coefficients = new Dictionary<int, double>();
+
+            foreach (var item in Coefficients)
+            {
+                AddMonomial(coefficients, item.Key - 1, item.Key * item.Value);
+            }
+            return new Polynomial(coefficients);
+        }
     }
 }

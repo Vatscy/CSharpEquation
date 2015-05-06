@@ -14,12 +14,24 @@ namespace Vatscy.Equation
 
             var x = Polynomial.X;
             var p = a * (x ^ 2) + b * x + c;
+            Console.WriteLine("y  = " + p);
+
+            Console.WriteLine();
             Console.WriteLine(p + " = 0");
-            
-            var solutions = p.SolveEquation(0);
-            Console.WriteLine("x = ["
-                + (solutions.Length == 0 ? "": solutions.Select(s => s.ToString()).Aggregate((now, next) => now + ", " + next))
-                + "]");
+            try
+            {
+                var solutions = p.SolveEquation(0);
+                Console.WriteLine("x = ["
+                    + (solutions.Length == 0 ? "" : solutions.Select(s => s.ToString()).Aggregate((now, next) => now + ", " + next))
+                    + "]");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("y' = " + p.Differentiate());
         }
 
         private static double ReadConstant(string name)

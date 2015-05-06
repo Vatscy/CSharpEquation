@@ -121,7 +121,7 @@ namespace Vatscy.Equation
 
             if (totalCoefficient != 0)
             {
-                coefficients[index] = coefficient;
+                coefficients[index] = totalCoefficient;
             }
             else
             {
